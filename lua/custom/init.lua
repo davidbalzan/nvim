@@ -8,3 +8,11 @@ vim.opt.shiftwidth = 4   -- Number of spaces to use for each step of (auto)inden
 
 vim.wo.number = true
 
+vim.api.nvim_create_autocmd("BufWritePre", {
+    pattern = "*",
+    callback = function(args)
+        require("conform").format({ bufnr = args.buf })
+        vim.api.nvim_echo({ { "Formatting buffer.. ", 'ErrorMsg' } }, true, {})
+    end,
+})
+

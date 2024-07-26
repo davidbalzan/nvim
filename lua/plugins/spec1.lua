@@ -1,14 +1,4 @@
 return {
-    -- the colorscheme should be available when starting Neovim
-    {
-        "folke/tokyonight.nvim",
-        lazy = false,    -- make sure we load this during startup if it is your main colorscheme
-        priority = 1000, -- make sure to load this before all the other start plugins
-        config = function()
-            -- load the colorscheme here
-            vim.cmd([[colorscheme tokyonight]])
-        end,
-    },
     {
         'nvim-telescope/telescope.nvim',
         branch = '0.1.x',
@@ -48,8 +38,60 @@ return {
             vim.keymap.set('n', '<leader>gs', vim.cmd.Git)
         end
     },
-    { 'williamboman/mason.nvim' },
+    {
+        "williamboman/mason.nvim",
+        dependencies = {
+            "WhoIsSethDaniel/mason-tool-installer.nvim",
+        },
+        config = function()
+            local mason = require("mason")
+
+            local mason_tool_installer = require("mason-tool-installer")
+
+            -- enable mason and configure icons
+            mason.setup({
+                ui = {
+                    icons = {
+                        package_installed = "✓",
+                        package_pending = "➜",
+                        package_uninstalled = "✗",
+                    },
+                },
+            })
+
+            mason_tool_installer.setup({
+                ensure_installed = {
+                    "prettier", -- prettier formatter
+                    "eslint_d", -- js linter
+                },
+            })
+        end,
+    },
     { 'williamboman/mason-lspconfig.nvim' },
+    {
+        "stevearc/conform.nvim",
+        opts = function(_, opts)
+            opts.formatters_by_ft = opts.formatters_by_ft or {}
+            opts.formatters_by_ft["javascript"] = { "prettier" }
+            opts.formatters_by_ft["typescript"] = { "prettier" }
+            opts.formatters_by_ft["html"] = { "prettier" }
+            opts.formatters_by_ft["css"] = { "prettier" }
+            opts.formatters_by_ft["json"] = { "prettier" }
+            opts.formatters_by_ft["yaml"] = { "prettier" }
+            -- tsx formatters
+            opts.formatters_by_ft["typescriptreact"] = { "prettier" }
+            opts.formatters_by_ft["javascriptreact"] = { "prettier" }
+            opts.formatters_by_ft["tsx"] = { "prettier" }
+            opts.formatters_by_ft["jsx"] = { "prettier" }
+
+            opts.formatters = opts.formatters or {}
+            opts.formatters.prettier = {
+                condition = function(_, ctx)
+                    return vim.g.lazyvim_prettier_needs_config ~= true or M.has_config(ctx)
+                end,
+            }
+        end,
+    },
     {
         'VonHeikemen/lsp-zero.nvim',
         branch = 'v3.x',
@@ -108,6 +150,7 @@ return {
                     { name = 'mason' },
                     { name = 'path' },
                     { name = 'buffer' },
+                    { name = 'prettier' },
                 },
                 preselect = cmp.PreselectMode.Item,
             })
@@ -118,4 +161,5 @@ return {
     { 'hrsh7th/cmp-nvim-lsp' },
     { 'hrsh7th/nvim-cmp' },
     { 'L3MON4D3/LuaSnip' },
+    { "folke/todo-comments.nvim",         opts = {} },
 }
